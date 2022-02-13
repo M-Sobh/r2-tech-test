@@ -14,7 +14,34 @@ apiRouter.get(`/recipes`, (req, res) => {
       res.status(200).send({ recipes: JSON.parse(data) });
     })
     .catch(() => {
-      res.status(404).send({ error: "No recipes found" });
+      res.status(404).send({ error: "Sorry, No recipes found." });
+    });
+});
+
+// Endpoint to Get a recipe by ID
+
+apiRouter.get(`/recipes/:id`, (req, res) => {
+  readFile(`./data/data.json`, "utf8")
+    .then((data) => {
+      const recipes = JSON.parse(data);
+      const recipesIds = recipes.map((recipe) => {
+        return recipe.id;
+      });
+      if (!recipesIds.includes(req.params.id)) {
+        return Promise.reject({ status: 404, msg: "recipe not found" });
+      }
+      let recipeById = recipes.filter((recipe) => {
+        if (recipe.id == req.params.id) {
+          return recipe;
+        }
+      });
+
+      res.status(200).send({ recipe: recipeById });
+    })
+    .catch(() => {
+      res
+        .status(404)
+        .send({ error: "Sorry, No recipe found with the Id you entered." });
     });
 });
 
