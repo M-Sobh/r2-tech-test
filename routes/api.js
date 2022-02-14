@@ -1,5 +1,5 @@
 const apiRouter = require("express").Router();
-const { readFile } = require("fs/promises");
+const { readFile, writeFile } = require("fs/promises");
 // const { getRecipes } = require("../controllers/recipes");
 
 apiRouter.get("/", (_, res) => {
@@ -43,6 +43,31 @@ apiRouter.get(`/recipes/:id`, (req, res) => {
         .status(404)
         .send({ error: "Sorry, No recipe found with the Id you entered." });
     });
+});
+
+// Endpoint to post new recipe
+
+apiRouter.post(`/recipes`, (req, res) => {
+  readFile("./data/data.json", "utf8").then((data) => {
+    const recipes = JSON.parse(data);
+    let newRecipe = req.body;
+    recipes.push(newRecipe);
+    let newRecipes = JSON.stringify(recipes, null, 2);
+    res.status(201).send({ recipes: JSON.parse(newRecipes) });
+    writeFile(
+      "./data/data.json",
+      newRecipes,
+      "utf-8",
+      { flag: "a+" },
+      (err) => {
+        if (err) {
+          console.log(error);
+          return;
+        }
+        console.log("New recipe added");
+      }
+    );
+  });
 });
 
 module.exports = apiRouter;

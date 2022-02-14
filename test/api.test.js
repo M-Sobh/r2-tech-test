@@ -43,14 +43,74 @@ describe("/api/recipes/:id", () => {
       "ingredients",
     ]);
   });
-  test.only("GET status:404, when passed a valid non-existent id", async () => {
+  test("GET status:404, when passed a valid non-existent id", async () => {
     const { body } = await request.get("/api/recipes/recipe-1000").expect(404);
     expect(body.msg).toBe("recipe not found");
   });
-  test("GET status:400, when passed an invalid id", async () => {
+  test.only("GET status:400, when passed an invalid id", async () => {
     const { body } = await request
       .get("/api/recipes/not-a-valid-id")
       .expect(400);
     expect(body.msg).toBe("Bad Request");
+  });
+});
+
+describe("/api/recipes", () => {
+  test("POST status:201, returns new recipe when passed a valid recipe", async () => {
+    const recipeToPost = {
+      id: "recipe-101",
+      imageUrl: "http://www.images.com/18",
+      instructions:
+        "60 seconds on the highest setting your blender has, or until a smooth paste has formed",
+      ingredients: [
+        {
+          name: "demerara sugar",
+          grams: 25,
+        },
+        {
+          name: "flax",
+          grams: 66,
+        },
+        {
+          name: "apple juice",
+          grams: 44,
+        },
+        {
+          name: "oat milk",
+          grams: 198,
+        },
+      ],
+    };
+    const { body } = await request
+      .post("/api/recipes")
+      .send(recipeToPost)
+      .expect(201);
+    expect(body).toContainKeys([
+      "id",
+      "imageUrl",
+      "instructions",
+      "ingredients",
+    ]);
+    expect(body.id).toBe(recipeToPost.id);
+    expect(body.imageUrl).toBe(recipeToPost.imageUrl);
+    expect(body.instructions).toBe(recipeToPost.instructions);
+    expect(body.ingredients).toEqual(recipeToPost.ingredients);
+  });
+  test("POST status:400, when posted recipe is missing properties", async () => {
+    const recipeToPost = {
+      id: "recipe-101",
+      imageUrl: "http://www.images.com/18",
+      instructions:
+        "60 seconds on the highest setting your blender has, or until a smooth paste has formed",
+    };
+    const { body } = await request
+      .post("/api/recipes")
+      .send(recipeToPost)
+      .expect(404);
+    expect(body.msg).toBe("Not Found");
+  });
+  test("INVALID METHOD status:405", async () => {
+    const { body } = await request.put("/api/recipes").expect(405);
+    expect(body.msg).toBe("Method Not Allowed");
   });
 });
