@@ -1,5 +1,6 @@
 const apiRouter = require("express").Router();
 const { readFile, writeFile } = require("fs/promises");
+
 // const { getRecipes } = require("../controllers/recipes");
 
 apiRouter.get("/", (_, res) => {
@@ -11,7 +12,25 @@ apiRouter.get("/", (_, res) => {
 apiRouter.get(`/recipes`, (req, res) => {
   readFile("./data/data.json", "utf8")
     .then((data) => {
-      res.status(200).send({ recipes: JSON.parse(data) });
+      let recipes = JSON.parse(data);
+      let excIngredients = req.query.exclude_ingredients;
+      //let regex = /apples|bananas|carrots/g
+      let regex = new RegExp("#" + excIngredients + "#", "g");
+      if (excIngredients) {
+        recipes.map((recipe) => {
+          recipe.ingredients.map((ingredient) => {
+            if (ingredient.name === regex) {
+              let filteredRecipes = _.remove(recipes, function () {
+                return recipe;
+              });
+              return filteredRecipes;
+            }
+          });
+        });
+        res.status(200).send({ recipes: filteredRecipes });
+      } else {
+        res.status(200).send({ recipes: recipes });
+      }
     })
     .catch(() => {
       res.status(404).send({ error: "Sorry, No recipes found." });
