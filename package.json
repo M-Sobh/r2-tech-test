@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/northcoders/r2-tech-test#readme",
   "dependencies": {
+    "body-parser": "^1.19.1",
     "express": "^4.17.2",
     "lodash": "^4.17.21"
   },
